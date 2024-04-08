@@ -78,7 +78,7 @@ func (c *Control) GetPages(args []string) ([]Response, error) {
 	}
 
 	sort.Slice(s, func(i, j int) bool {
-		return s[i].Id < s[j].Id
+		return s[i].OrderNum < s[j].OrderNum
 	})
 	sort.Slice(s, func(i, j int) bool {
 		return s[i].Shelf < s[j].Shelf
