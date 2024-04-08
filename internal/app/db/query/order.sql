@@ -1,12 +1,11 @@
 -- name: CreateOrder :one
 INSERT INTO Orders (
-    order_number, 
-    product_name, 
-    quantity, 
-    product_id, 
-    additional_shelf
+    order_number,
+    product_name,
+    quantity,
+    product_id
 ) VALUES (
-      $1, $2, $3, $4, $5
+      $1, $2, $3, $4
 ) RETURNING *;
 
 -- name: GetOrders :many
@@ -19,10 +18,12 @@ SELECT * FROM Orders WHERE order_number = $1;
 -- name: GetOrderByProductID :one
 SELECT * FROM Orders WHERE product_id = $1;
 
--- name: UpdateOrder :one
+-- name: UpdateOrder :exec
 UPDATE Orders
-SET quantity = $2, additional_shelf = $3
-WHERE order_id = $1
+SET order_number = $2,
+    product_name = $3,
+    quantity = $4,
+    product_id = $5 WHERE order_id = $1
 RETURNING *;
 
 -- name: DeleteOrder :one

@@ -10,14 +10,13 @@ import (
 )
 
 type Order struct {
-	OrderID         int32          `json:"order_id"`
-	OrderNumber     string         `json:"order_number"`
-	ProductName     string         `json:"product_name"`
-	Quantity        int32          `json:"quantity"`
-	ProductID       sql.NullInt32  `json:"product_id"`
-	AdditionalShelf sql.NullString `json:"additional_shelf"`
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
+	OrderID     int32         `json:"order_id"`
+	OrderNumber string        `json:"order_number"`
+	ProductName string        `json:"product_name"`
+	Quantity    int32         `json:"quantity"`
+	ProductID   sql.NullInt32 `json:"product_id"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
 type Product struct {

@@ -32,7 +32,7 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
--- name: UpdateProduct :one
+-- name: UpdateProduct :exec
 UPDATE products
 SET
 	title = $2,

@@ -12,22 +12,20 @@ import (
 
 const createOrder = `-- name: CreateOrder :one
 INSERT INTO Orders (
-    order_number, 
-    product_name, 
-    quantity, 
-    product_id, 
-    additional_shelf
+    order_number,
+    product_name,
+    quantity,
+    product_id
 ) VALUES (
-      $1, $2, $3, $4, $5
-) RETURNING order_id, order_number, product_name, quantity, product_id, additional_shelf, created_at, updated_at
+      $1, $2, $3, $4
+) RETURNING order_id, order_number, product_name, quantity, product_id, created_at, updated_at
 `
 
 type CreateOrderParams struct {
-	OrderNumber     string         `json:"order_number"`
-	ProductName     string         `json:"product_name"`
-	Quantity        int32          `json:"quantity"`
-	ProductID       sql.NullInt32  `json:"product_id"`
-	AdditionalShelf sql.NullString `json:"additional_shelf"`
+	OrderNumber string        `json:"order_number"`
+	ProductName string        `json:"product_name"`
+	Quantity    int32         `json:"quantity"`
+	ProductID   sql.NullInt32 `json:"product_id"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
@@ -36,7 +34,6 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		arg.ProductName,
 		arg.Quantity,
 		arg.ProductID,
-		arg.AdditionalShelf,
 	)
 	var i Order
 	err := row.Scan(
@@ -45,7 +42,6 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.ProductName,
 		&i.Quantity,
 		&i.ProductID,
-		&i.AdditionalShelf,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -121,7 +117,7 @@ func (q *Queries) GetOrderByGrouping(ctx context.Context, orderNumber string) ([
 }
 
 const getOrderByNumber = `-- name: GetOrderByNumber :one
-SELECT order_id, order_number, product_name, quantity, product_id, additional_shelf, created_at, updated_at FROM Orders WHERE order_number = $1
+SELECT order_id, order_number, product_name, quantity, product_id, created_at, updated_at FROM Orders WHERE order_number = $1
 `
 
 func (q *Queries) GetOrderByNumber(ctx context.Context, orderNumber string) (Order, error) {
@@ -133,7 +129,6 @@ func (q *Queries) GetOrderByNumber(ctx context.Context, orderNumber string) (Ord
 		&i.ProductName,
 		&i.Quantity,
 		&i.ProductID,
-		&i.AdditionalShelf,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -141,7 +136,7 @@ func (q *Queries) GetOrderByNumber(ctx context.Context, orderNumber string) (Ord
 }
 
 const getOrderByProductID = `-- name: GetOrderByProductID :one
-SELECT order_id, order_number, product_name, quantity, product_id, additional_shelf, created_at, updated_at FROM Orders WHERE product_id = $1
+SELECT order_id, order_number, product_name, quantity, product_id, created_at, updated_at FROM Orders WHERE product_id = $1
 `
 
 func (q *Queries) GetOrderByProductID(ctx context.Context, productID sql.NullInt32) (Order, error) {
@@ -153,7 +148,6 @@ func (q *Queries) GetOrderByProductID(ctx context.Context, productID sql.NullInt
 		&i.ProductName,
 		&i.Quantity,
 		&i.ProductID,
-		&i.AdditionalShelf,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -161,7 +155,7 @@ func (q *Queries) GetOrderByProductID(ctx context.Context, productID sql.NullInt
 }
 
 const getOrders = `-- name: GetOrders :many
-SELECT order_id, order_number, product_name, quantity, product_id, additional_shelf, created_at, updated_at FROM Orders
+SELECT order_id, order_number, product_name, quantity, product_id, created_at, updated_at FROM Orders
 `
 
 func (q *Queries) GetOrders(ctx context.Context) ([]Order, error) {
@@ -179,7 +173,6 @@ func (q *Queries) GetOrders(ctx context.Context) ([]Order, error) {
 			&i.ProductName,
 			&i.Quantity,
 			&i.ProductID,
-			&i.AdditionalShelf,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -196,31 +189,30 @@ func (q *Queries) GetOrders(ctx context.Context) ([]Order, error) {
 	return items, nil
 }
 
-const updateOrder = `-- name: UpdateOrder :one
+const updateOrder = `-- name: UpdateOrder :exec
 UPDATE Orders
-SET quantity = $2, additional_shelf = $3
-WHERE order_id = $1
-RETURNING order_id, order_number, product_name, quantity, product_id, additional_shelf, created_at, updated_at
+SET order_number = $2,
+    product_name = $3,
+    quantity = $4,
+    product_id = $5 WHERE order_id = $1
+RETURNING order_id, order_number, product_name, quantity, product_id, created_at, updated_at
 `
 
 type UpdateOrderParams struct {
-	OrderID         int32          `json:"order_id"`
-	Quantity        int32          `json:"quantity"`
-	AdditionalShelf sql.NullString `json:"additional_shelf"`
+	OrderID     int32         `json:"order_id"`
+	OrderNumber string        `json:"order_number"`
+	ProductName string        `json:"product_name"`
+	Quantity    int32         `json:"quantity"`
+	ProductID   sql.NullInt32 `json:"product_id"`
 }
 
-func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) (Order, error) {
-	row := q.db.QueryRowContext(ctx, updateOrder, arg.OrderID, arg.Quantity, arg.AdditionalShelf)
-	var i Order
-	err := row.Scan(
-		&i.OrderID,
-		&i.OrderNumber,
-		&i.ProductName,
-		&i.Quantity,
-		&i.ProductID,
-		&i.AdditionalShelf,
-		&i.CreatedAt,
-		&i.UpdatedAt,
+func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) error {
+	_, err := q.db.ExecContext(ctx, updateOrder,
+		arg.OrderID,
+		arg.OrderNumber,
+		arg.ProductName,
+		arg.Quantity,
+		arg.ProductID,
 	)
-	return i, err
+	return err
 }

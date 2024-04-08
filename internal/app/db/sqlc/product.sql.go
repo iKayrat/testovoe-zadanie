@@ -162,7 +162,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 	return items, nil
 }
 
-const updateProduct = `-- name: UpdateProduct :one
+const updateProduct = `-- name: UpdateProduct :exec
 UPDATE products
 SET
 	title = $2,
@@ -183,8 +183,8 @@ type UpdateProductParams struct {
 	UpdatedAt   time.Time       `json:"updated_at"`
 }
 
-func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error) {
-	row := q.db.QueryRowContext(ctx, updateProduct,
+func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
+	_, err := q.db.ExecContext(ctx, updateProduct,
 		arg.ID,
 		arg.Title,
 		arg.Active,
@@ -192,15 +192,5 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		arg.Description,
 		arg.UpdatedAt,
 	)
-	var i Product
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.Active,
-		&i.Price,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	return err
 }

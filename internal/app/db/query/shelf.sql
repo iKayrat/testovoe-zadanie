@@ -10,7 +10,7 @@ SELECT * FROM Shelves WHERE shelf_id = 1;
 -- name: GetShelfByName :one
 SELECT * FROM Shelves WHERE shelf_name = $1;
 
--- name: UpdateShelf :one
+-- name: UpdateShelf :exec
 UPDATE Shelves
 SET shelf_name = $2
 WHERE shelf_id = $1

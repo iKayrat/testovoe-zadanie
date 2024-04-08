@@ -103,21 +103,20 @@ func (q *Queries) GetPShelvesByShelfID(ctx context.Context, shelfID sql.NullInt3
 	return i, err
 }
 
-const updatePShelves = `-- name: UpdatePShelves :one
+const updatePShelves = `-- name: UpdatePShelves :exec
 UPDATE Product_Shelves
-SET is_primary = false
+SET is_primary = $3
 WHERE id = $1 AND shelf_id = $2
 RETURNING id, shelf_id, is_primary
 `
 
 type UpdatePShelvesParams struct {
-	ID      sql.NullInt32 `json:"id"`
-	ShelfID sql.NullInt32 `json:"shelf_id"`
+	ID        sql.NullInt32 `json:"id"`
+	ShelfID   sql.NullInt32 `json:"shelf_id"`
+	IsPrimary sql.NullBool  `json:"is_primary"`
 }
 
-func (q *Queries) UpdatePShelves(ctx context.Context, arg UpdatePShelvesParams) (ProductShelf, error) {
-	row := q.db.QueryRowContext(ctx, updatePShelves, arg.ID, arg.ShelfID)
-	var i ProductShelf
-	err := row.Scan(&i.ID, &i.ShelfID, &i.IsPrimary)
-	return i, err
+func (q *Queries) UpdatePShelves(ctx context.Context, arg UpdatePShelvesParams) error {
+	_, err := q.db.ExecContext(ctx, updatePShelves, arg.ID, arg.ShelfID, arg.IsPrimary)
+	return err
 }

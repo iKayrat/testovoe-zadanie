@@ -81,7 +81,7 @@ func (q *Queries) GetShelfs(ctx context.Context) ([]Shelf, error) {
 	return items, nil
 }
 
-const updateShelf = `-- name: UpdateShelf :one
+const updateShelf = `-- name: UpdateShelf :exec
 UPDATE Shelves
 SET shelf_name = $2
 WHERE shelf_id = $1
@@ -93,9 +93,7 @@ type UpdateShelfParams struct {
 	ShelfName string `json:"shelf_name"`
 }
 
-func (q *Queries) UpdateShelf(ctx context.Context, arg UpdateShelfParams) (Shelf, error) {
-	row := q.db.QueryRowContext(ctx, updateShelf, arg.ShelfID, arg.ShelfName)
-	var i Shelf
-	err := row.Scan(&i.ShelfID, &i.ShelfName)
-	return i, err
+func (q *Queries) UpdateShelf(ctx context.Context, arg UpdateShelfParams) error {
+	_, err := q.db.ExecContext(ctx, updateShelf, arg.ShelfID, arg.ShelfName)
+	return err
 }

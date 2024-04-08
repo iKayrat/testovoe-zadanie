@@ -14,9 +14,9 @@ SELECT * FROM Product_Shelves WHERE shelf_id = $1;
 -- name: GetPShelvesByIDs :one
 SELECT * FROM Product_Shelves WHERE id = $1 AND shelf_id = $2;
 
--- name: UpdatePShelves :one
+-- name: UpdatePShelves :exec
 UPDATE Product_Shelves
-SET is_primary = false
+SET is_primary = $3
 WHERE id = $1 AND shelf_id = $2
 RETURNING *;
 
